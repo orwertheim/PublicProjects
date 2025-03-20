@@ -1,3 +1,7 @@
+def test():
+    version=1
+    print(f'utils.py version:{version}')
+
 def plot_rgb_3d(image, sample_size=10000):
     if isinstance(image, str):  # If input is a file path, load the image
         img = Image.open(image).convert("RGB")
