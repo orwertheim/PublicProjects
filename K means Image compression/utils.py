@@ -100,12 +100,4 @@ def display_images(images, titles):
     # Adjust layout to prevent overlapping titles and images
     plt.subplots_adjust(wspace=0.1, hspace=0.3)  # Decrease space between images
     plt.show()
-
-class Utils:
-    pass
-utils = Utils()
-utils.test = test
-utils.display_images = display_images 
-utils.plot_kMeans_RGB=plot_kMeans_RGB 
-utils.plot_rgb_3d = plot_rgb_3d
-utils.show_centroid_colors=show_centroid_colors
+ 
