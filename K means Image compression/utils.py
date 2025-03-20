@@ -5,37 +5,65 @@ from PIL import Image
 def test():
     version=1.3
     print(f'utils.py version:{version}')
+    
+def plot_costs(x, title='', x_label='', y_label='', bins=30, y_lim=None):
+    """
+    Plots the costs of multiple K-Means initializations.
 
-def plot_kMeans_RGB(X, centroids, idx, sample_size=5000, title="Original colors"):
+    Args:
+        costs (ndarray or list): Array or list of cost values from different K-Means initializations.
+    """
+    plt.figure(figsize=(8, 6))
+  
+    plt.plot(x, color='skyblue', marker='o', linestyle='', markersize=5, alpha=0.7)
+    # Add titles and labels
+    plt.title(title, fontsize=14)
+    plt.xlabel(x_label, fontsize=12)
+    plt.ylabel(y_label, fontsize=12)
+
+    if y_lim is not None:
+      plt.ylim(y_lim[0], y_lim[1])
+
+    # Show plot
+    plt.show()
+    
+def plot_kMeans_RGB(X, centroids1, idx1, centroids2=None, idx2=None, sample_size=5000, title="Original colors"):
     # Ensure input is a NumPy array
     X = np.array(X)
+    
     # Sample pixels to reduce compute time
     sample_indices = np.random.choice(len(X), size=min(sample_size, len(X)), replace=False)
     X_sampled = X[sample_indices]
-    colors = X_sampled # Original colors
-
-    fig, axes = plt.subplots(1, 2, figsize=(22, 44), subplot_kw={'projection': '3d'})
+    colors1 = X_sampled  # Original colors
     
-     
+    num_plots = 3 if centroids2 is not None else 2
+    fig, axes = plt.subplots(1, num_plots, figsize=(22, 44), subplot_kw={'projection': '3d'})
     
-    for i,ax in enumerate(axes): 
-      ax.set_title(title)
-      if i == 1:
-        idx = idx[sample_indices]  # Sample idx to match X_sampled
-        colors = centroids[idx] # Color points by their centroid color
-        ax.set_title("Pixel Colors Based on Their Centroid")  
-        ax.scatter(*centroids.T*255, depthshade=False, s=500, c='red', marker='x', lw=3)    
-      ax.scatter(*X_sampled.T*255, zdir='z', depthshade=False, s=3, c=colors)
-      
-      ax.set_xlabel('R value - Redness')
-      ax.set_ylabel('G value - Greenness')
-      ax.set_zlabel('B value - Blueness')
-
-      # Set the color of the Y-axis pane
-      ax.yaxis.pane.fill = True
-      ax.yaxis.pane.set_edgecolor('w')
-      ax.yaxis.pane.set_facecolor((0., 0., 0., .2))  # Set the color
-       
+    for i, ax in enumerate(axes):
+        if i == 0:
+            ax.set_title(title)
+            colors = X_sampled  # Original colors
+        elif i == 1:
+            idx1_sampled = idx1[sample_indices]  # Sample idx to match X_sampled
+            colors = centroids1[idx1_sampled]  # Color points by their centroid color
+            ax.set_title("Pixel Colors Based on First Centroids")
+            ax.scatter(*centroids1.T * 255, depthshade=False, s=500, c='red', marker='x', lw=3)
+        else:
+            idx2_sampled = idx2[sample_indices]  # Sample idx2 to match X_sampled
+            colors = centroids2[idx2_sampled]  # Color points by second centroid color
+            ax.set_title("Pixel Colors Based on Second Centroids")
+            ax.scatter(*centroids2.T * 255, depthshade=False, s=500, c='blue', marker='x', lw=3)
+        
+        ax.scatter(*X_sampled.T * 255, zdir='z', depthshade=False, s=3, c=colors)
+        ax.set_xlabel('R value - Redness')
+        ax.set_ylabel('G value - Greenness')
+        ax.set_zlabel('B value - Blueness')
+        
+        # Set the color of the Y-axis pane
+        ax.yaxis.pane.fill = True
+        ax.yaxis.pane.set_edgecolor('w')
+        ax.yaxis.pane.set_facecolor((0., 0., 0., .2))  # Set the color
+    
     plt.tight_layout()
     plt.show()
  
