@@ -46,12 +46,12 @@ def plot_kMeans_RGB(X, centroids1, idx1, centroids2=None, idx2=None, sample_size
         elif i == 1:
             idx1_sampled = idx1[sample_indices]  # Sample idx to match X_sampled
             colors = centroids1[idx1_sampled]  # Color points by their centroid color
-            ax.set_title("Pixel Colors Based on First Centroids")
+            ax.set_title(f'Pixel Colors Based on {len(centroids1)} Centroids')
             ax.scatter(*centroids1.T * 255, depthshade=False, s=500, c='red', marker='x', lw=3)
         else:
             idx2_sampled = idx2[sample_indices]  # Sample idx2 to match X_sampled
             colors = centroids2[idx2_sampled]  # Color points by second centroid color
-            ax.set_title("Pixel Colors Based on Second Centroids")
+            ax.set_title(f'Pixel Colors Based on {len(centroids2)} Centroids')
             ax.scatter(*centroids2.T * 255, depthshade=False, s=500, c='blue', marker='x', lw=3)
         
         ax.scatter(*X_sampled.T * 255, zdir='z', depthshade=False, s=3, c=colors)
