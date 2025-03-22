@@ -26,47 +26,78 @@ def plot_costs(x, title='', x_label='', y_label='', bins=30, y_lim=None):
 
     # Show plot
     plt.show()
+
+
+def download_from_gdrive(file_id, destination):
+    try:
+        # First create a session
+        session = requests.Session()
+        
+        # Get the initial page to get cookies
+        url = f"https://drive.google.com/uc?export=download&id={file_id}"
+        response = session.get(url, stream=True)
+        
+        # Check if there's a download warning (for larger files)
+        for key, value in response.cookies.items():
+            if key.startswith('download_warning'):
+                # Add confirmation parameter
+                url = f"{url}&confirm={value}"
+                break
+        
+        # Now download with the confirmation if needed
+        response = session.get(url, stream=True)
+        img = Image.open(BytesIO(response.content))
+        img.save(destination)
+        # Save the response content 
+        return True
+    except Exception as e:
+        print(f"Error downloading from Google Drive: {e}")
+        return False
+        
+def plot_kMeans_RGB(X, centroids_list, idx_list, titles, sample_size=5000):
+    """
+    Plots the RGB pixel distribution in 3D space for the original image and multiple sets of K-means cluster centroids.
     
-def plot_kMeans_RGB(X, centroids1, idx1, centroids2=None, idx2=None, sample_size=5000, title="Original colors"):
-    # Ensure input is a NumPy array
+    Parameters:
+        X (array-like): Original image data in RGB format, shape (N, 3).
+        centroids_list (list of array-like): List of cluster centroid arrays, each of shape (K, 3).
+        idx_list (list of array-like): List of cluster assignments, each of shape (N,).
+        titles (list of str): Titles for each plot.
+        sample_size (int, optional): Number of pixels to sample for visualization (default: 5000).
+    """
     X = np.array(X)
     
-    # Sample pixels to reduce compute time
+    # Sample pixels to reduce computational load
     sample_indices = np.random.choice(len(X), size=min(sample_size, len(X)), replace=False)
     X_sampled = X[sample_indices]
-    colors1 = X_sampled  # Original colors
     
-    num_plots = 3 if centroids2 is not None else 2
-    fig, axes = plt.subplots(1, num_plots, figsize=(22, 44), subplot_kw={'projection': '3d'})
+    num_plots = 1 + len(centroids_list)
+    fig, axes = plt.subplots(1, num_plots, figsize=(22, 8), subplot_kw={'projection': '3d'})
+    
+    if num_plots == 1:
+        axes = [axes]  # Ensure iterable consistency
     
     for i, ax in enumerate(axes):
         if i == 0:
-            ax.set_title(title)
             colors = X_sampled  # Original colors
-        elif i == 1:
-            idx1_sampled = idx1[sample_indices]  # Sample idx to match X_sampled
-            colors = centroids1[idx1_sampled]  # Color points by their centroid color
-            ax.set_title(f'Pixel Colors Based on {len(centroids1)} Centroids')
-            ax.scatter(*centroids1.T * 255, depthshade=False, s=500, c='red', marker='x', lw=3)
         else:
-            idx2_sampled = idx2[sample_indices]  # Sample idx2 to match X_sampled
-            colors = centroids2[idx2_sampled]  # Color points by second centroid color
-            ax.set_title(f'Pixel Colors Based on {len(centroids2)} Centroids')
-            ax.scatter(*centroids2.T * 255, depthshade=False, s=500, c='blue', marker='x', lw=3)
+            idx_sampled = idx_list[i - 1][sample_indices]
+            colors = centroids_list[i - 1][idx_sampled]  # Assign colors based on clustering
+            ax.scatter(*centroids_list[i - 1].T * 255, depthshade=False, s=200, c='black', marker='x', lw=2)
         
+        ax.set_title(titles[i])
         ax.scatter(*X_sampled.T * 255, zdir='z', depthshade=False, s=3, c=colors)
-        ax.set_xlabel('R value - Redness')
-        ax.set_ylabel('G value - Greenness')
-        ax.set_zlabel('B value - Blueness')
+        ax.set_xlabel('Red Channel')
+        ax.set_ylabel('Green Channel')
+        ax.set_zlabel('Blue Channel')
         
-        # Set the color of the Y-axis pane
+        # Improve 3D plot appearance
         ax.yaxis.pane.fill = True
         ax.yaxis.pane.set_edgecolor('w')
-        ax.yaxis.pane.set_facecolor((0., 0., 0., .2))  # Set the color
-    
+        ax.yaxis.pane.set_facecolor((0., 0., 0., .2))
+    print('------------------')
     plt.tight_layout()
     plt.show()
- 
 
 def plot_rgb_3d(image, title= '3D RGB Color Distribution', sample_size=10000):
     if isinstance(image, str):  # If input is a file path, load the image
